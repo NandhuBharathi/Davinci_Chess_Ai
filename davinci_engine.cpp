@@ -4,68 +4,48 @@
 
 typedef uint64_t U64;
 
-// 12 Coins-kum Index (Caps = White, Small = Black)
 enum Piece { P, N, B, R, Q, K, p, n, b, r, q, k };
 U64 bitboards[12] = {0};
 
-// Square-la coin-a ulla vaikkum function
+// File Masks (Kuthirai board-ai vittu veliye kuthikkama irukka)
+const U64 NOT_A_FILE = 0xFEFEFEFEFEFEFEFEULL;
+const U64 NOT_AB_FILE = 0xFCFCFCFCFCFCFCFCULL;
+const U64 NOT_H_FILE = 0x7F7F7F7F7F7F7F7FULL;
+const U64 NOT_GH_FILE = 0x3F3F3F3F3F3F3F3FULL;
+
 void set_bit(U64 &board, int square) {
     board |= (1ULL << square);
 }
 
-// Neenga sonna Caps/Lowercase logic-a purinjikkum AI Parser!
-void parse_fen(std::string fen) {
-    int square = 56; // Top left corner (A8) irunthu start panrom
-    
-    for (char const &c : fen) {
-        if (c == ' ') break; // Board layout mudinchuruchu
-        if (c == '/') { square -= 16; continue; } // Adutha variykku (rank) pogum
-        if (isdigit(c)) { square += (c - '0'); continue; } // Empty kattangal
+// Knight-oda L-Shape moves-ai calculate panra Bitwise Magic
+U64 mask_knight_attacks(int square) {
+    U64 attacks = 0ULL;
+    U64 bitboard = 0ULL;
+    set_bit(bitboard, square);
 
-        // Character-a vachi sariyaana bitboard-la set panrom
-        switch (c) {
-            case 'P': set_bit(bitboards[P], square); break;
-            case 'N': set_bit(bitboards[N], square); break;
-            case 'B': set_bit(bitboards[B], square); break;
-            case 'R': set_bit(bitboards[R], square); break;
-            case 'Q': set_bit(bitboards[Q], square); break;
-            case 'K': set_bit(bitboards[K], square); break;
-            case 'p': set_bit(bitboards[p], square); break;
-            case 'n': set_bit(bitboards[n], square); break;
-            case 'b': set_bit(bitboards[b], square); break;
-            case 'r': set_bit(bitboards[r], square); break;
-            case 'q': set_bit(bitboards[q], square); break;
-            case 'k': set_bit(bitboards[k], square); break;
-        }
-        square++;
-    }
+    // Kuthiraiyin 8 disaigal (Bit shifts)
+    if ((bitboard >> 17) & NOT_H_FILE) attacks |= (bitboard >> 17);
+    if ((bitboard >> 15) & NOT_A_FILE) attacks |= (bitboard >> 15);
+    if ((bitboard >> 10) & NOT_GH_FILE) attacks |= (bitboard >> 10);
+    if ((bitboard >> 6)  & NOT_AB_FILE) attacks |= (bitboard >> 6);
+    
+    if ((bitboard << 17) & NOT_A_FILE) attacks |= (bitboard << 17);
+    if ((bitboard << 15) & NOT_H_FILE) attacks |= (bitboard << 15);
+    if ((bitboard << 10) & NOT_AB_FILE) attacks |= (bitboard << 10);
+    if ((bitboard << 6)  & NOT_GH_FILE) attacks |= (bitboard << 6);
+
+    return attacks;
 }
 
-// Motha board-aiyum onna serthu print panna
-void print_board() {
-    std::cout << "\n  Davinci's Vision: The Full Board\n";
+// Attack map-a print panni paarkka
+void print_bitboard(U64 board, std::string title) {
+    std::cout << "\n  " << title << "\n";
     std::cout << "  --------------------------------\n";
     for (int rank = 7; rank >= 0; rank--) {
         std::cout << rank + 1 << " | ";
         for (int file = 0; file < 8; file++) {
             int square = rank * 8 + file;
-            char piece_char = '.'; // Empty aaga iruntha pulli (.)
-            
-            // Entha bitboard-la coin irukku nu thedi character-a maathuvathu
-            if (bitboards[P] & (1ULL << square)) piece_char = 'P';
-            else if (bitboards[N] & (1ULL << square)) piece_char = 'N';
-            else if (bitboards[B] & (1ULL << square)) piece_char = 'B';
-            else if (bitboards[R] & (1ULL << square)) piece_char = 'R';
-            else if (bitboards[Q] & (1ULL << square)) piece_char = 'Q';
-            else if (bitboards[K] & (1ULL << square)) piece_char = 'K';
-            else if (bitboards[p] & (1ULL << square)) piece_char = 'p';
-            else if (bitboards[n] & (1ULL << square)) piece_char = 'n';
-            else if (bitboards[b] & (1ULL << square)) piece_char = 'b';
-            else if (bitboards[r] & (1ULL << square)) piece_char = 'r';
-            else if (bitboards[q] & (1ULL << square)) piece_char = 'q';
-            else if (bitboards[k] & (1ULL << square)) piece_char = 'k';
-
-            std::cout << piece_char << " ";
+            std::cout << ((board & (1ULL << square)) ? "X " : ". ");
         }
         std::cout << "\n";
     }
@@ -74,11 +54,11 @@ void print_board() {
 }
 
 int main() {
-    // Chess-oda standard starting position FEN string
-    std::string start_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    // Example: D4 kattathil (Square 27) oru Knight irunthaal, athu enga ellam pogum?
+    int knight_square = 27; 
+    U64 knight_attacks = mask_knight_attacks(knight_square);
     
-    parse_fen(start_fen);
-    print_board();
+    print_bitboard(knight_attacks, "Davinci's Mind: Knight Attacks from D4");
 
     return 0;
 }
