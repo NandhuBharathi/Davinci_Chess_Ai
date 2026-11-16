@@ -1,24 +1,16 @@
 #include <iostream>
 #include <string>
 #include <cstdint>
-
-// Modular Rules Headers (Folder-la irunthu connect panrom)
-#include "rules/common.hpp"
-#include "rules/knight.hpp"
-#include "rules/king.hpp"
-#include "rules/pawn.hpp"
-#include "rules/rook.hpp"
-#include "rules/bishop.hpp"
-#include "rules/queen.hpp"
+#include "rules/validator.hpp"
 
 // 12 Coins Index
 enum Piece { P, N, B, R, Q, K, p, n, b, r, q, k };
 U64 bitboards[12] = {0};
 
-// FEN Parser (Caps = White, Small = Black) - Fully Restored!
+// FEN Parser
 void parse_fen(std::string fen) {
-    for (int i = 0; i < 12; i++) bitboards[i] = 0; // Clear board first
-    int square = 56; // Top left corner (A8) irunthu start panrom
+    for (int i = 0; i < 12; i++) bitboards[i] = 0;
+    int square = 56; 
     
     for (char const &c : fen) {
         if (c == ' ') break; 
@@ -43,7 +35,6 @@ void parse_fen(std::string fen) {
     }
 }
 
-// Motha board-aiyum onna serthu print panra function
 void print_board() {
     std::cout << "\n  Davinci's Vision: The Full Board\n";
     std::cout << "  --------------------------------\n";
@@ -74,33 +65,22 @@ void print_board() {
     std::cout << "    A B C D E F G H\n\n";
 }
 
-// Bitboard attacks-a print panra helper
-void print_bitboard(U64 board, std::string title) {
-    std::cout << "\n  " << title << "\n";
-    std::cout << "  --------------------------------\n";
-    for (int rank = 7; rank >= 0; rank--) {
-        std::cout << rank + 1 << " | ";
-        for (int file = 0; file < 8; file++) {
-            int square = rank * 8 + file;
-            std::cout << ((board & (1ULL << square)) ? "X " : ". ");
-        }
-        std::cout << "\n";
-    }
-    std::cout << "    ----------------\n";
-    std::cout << "    A B C D E F G H\n\n";
-}
-
 int main() {
-    std::cout << "🔥 Davinci Engine: Fully Integrated & Connected 🔥\n\n";
+    std::cout << "🔥 Davinci Engine: Strict FIDE Rule Validator Active 🔥\n\n";
     
-    // 1. Test FEN Parser & Full Board Display
-    std::string start_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    parse_fen(start_fen);
+    parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     print_board();
 
-    // 2. Test Queen Attacks from D4 (Square 27) using rules/queen.hpp
-    U64 queen_attacks = mask_queen_attacks(27, 0ULL);
-    print_bitboard(queen_attacks, "Queen Attacks from D4 (Connected via rules/queen.hpp)");
+    // Testing Move Legality Rule Check:
+    // Let's test if a Knight from B1 (Square 1) can legally move to C3 (Square 18)
+    U64 all_blockers = 0ULL;
+    for(int i=0; i<12; i++) all_blockers |= bitboards[i];
+    U64 white_pieces = bitboards[P] | bitboards[N] | bitboards[B] | bitboards[R] | bitboards[Q] | bitboards[K];
+    CastlingRights rights;
+
+    bool test_move = is_legal_move(1, 1, 18, 60, all_blockers, white_pieces, rights, -1, 0);
+    
+    std::cout << "Move Test (Knight B1 -> C3): " << (test_move ? "LEGAL ✅" : "ILLEGAL ❌") << "\n";
 
     return 0;
 }
