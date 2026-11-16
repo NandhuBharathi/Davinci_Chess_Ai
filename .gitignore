@@ -1,0 +1,5 @@
+__pycache__/
+*.so
+*.pyc
+.virtual_documents/
+state.db
