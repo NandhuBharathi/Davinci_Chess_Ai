@@ -1,12 +1,11 @@
 #include <iostream>
 #include <string>
-// Rules folder-la irunthu thani thaniyaa include panrom!
 #include "rules/common.hpp"
 #include "rules/knight.hpp"
 #include "rules/king.hpp"
 #include "rules/pawn.hpp"
+#include "rules/rook.hpp" // Rook rule-a inaikkurom!
 
-// 12 Coins-kum Index
 enum Piece { P, N, B, R, Q, K, p, n, b, r, q, k };
 U64 bitboards[12] = {0};
 
@@ -34,27 +33,15 @@ void parse_fen(std::string fen) {
     }
 }
 
-void print_board() {
-    std::cout << "\n  Davinci's Vision: The Full Board\n";
+// Bitboard printing-kaga oru chinna helper function
+void print_bitboard(U64 board, std::string title) {
+    std::cout << "\n  " << title << "\n";
     std::cout << "  --------------------------------\n";
     for (int rank = 7; rank >= 0; rank--) {
         std::cout << rank + 1 << " | ";
         for (int file = 0; file < 8; file++) {
             int square = rank * 8 + file;
-            char piece_char = '.'; 
-            if (bitboards[P] & (1ULL << square)) piece_char = 'P';
-            else if (bitboards[N] & (1ULL << square)) piece_char = 'N';
-            else if (bitboards[B] & (1ULL << square)) piece_char = 'B';
-            else if (bitboards[R] & (1ULL << square)) piece_char = 'R';
-            else if (bitboards[Q] & (1ULL << square)) piece_char = 'Q';
-            else if (bitboards[K] & (1ULL << square)) piece_char = 'K';
-            else if (bitboards[p] & (1ULL << square)) piece_char = 'p';
-            else if (bitboards[n] & (1ULL << square)) piece_char = 'n';
-            else if (bitboards[b] & (1ULL << square)) piece_char = 'b';
-            else if (bitboards[r] & (1ULL << square)) piece_char = 'r';
-            else if (bitboards[q] & (1ULL << square)) piece_char = 'q';
-            else if (bitboards[k] & (1ULL << square)) piece_char = 'k';
-            std::cout << piece_char << " ";
+            std::cout << ((board & (1ULL << square)) ? "X " : ". ");
         }
         std::cout << "\n";
     }
@@ -63,13 +50,19 @@ void print_board() {
 }
 
 int main() {
-    std::cout << "🔥 Davinci Engine (Modular Folder Arch) Initialized 🔥\n";
-    parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    print_board();
+    std::cout << "🔥 Davinci Engine: Rook Ray Casting Active 🔥\n";
     
-    // Test modular rules
-    U64 test_knight = mask_knight_attacks(27);
-    std::cout << "Folder Logic Test (Knight D4): " << test_knight << "\n";
+    // Test Scenario: E4-la oru Yaanai (Square 28). 
+    // E6-la oru Sipaai irukku (Blocker). 
+    // Yaanai E6-a thaandi poga koodathu.
+    
+    U64 blockers = 0ULL;
+    set_bit(blockers, 44); // E6 kattathula oru coin nirkuthu
+    
+    U64 rook_attacks = mask_rook_attacks(28, blockers);
+    
+    print_bitboard(blockers, "Board-la ulla Blockers (E6)");
+    print_bitboard(rook_attacks, "Rook Attacks (E4-la irunthu)");
 
     return 0;
 }
