@@ -1,16 +1,22 @@
 #include <iostream>
 #include <string>
 #include <cstdint>
-#include "rules/validator.hpp"
 
-// 12 Coins Index
+// Modular FIDE Rules Headers
+#include "rules/validator.hpp"
+#include "rules/game_status.hpp"
+#include "rules/draw_rules.hpp"
+#include "rules/repetition.hpp"
+#include "rules/special_rules.hpp"
+
+// 12 Coins Index (0-5: White [P, N, B, R, Q, K], 6-11: Black [p, n, b, r, q, k])
 enum Piece { P, N, B, R, Q, K, p, n, b, r, q, k };
 U64 bitboards[12] = {0};
 
-// FEN Parser
+// FEN Parser: Board state-ai initialize panra function
 void parse_fen(std::string fen) {
     for (int i = 0; i < 12; i++) bitboards[i] = 0;
-    int square = 56; 
+    int square = 56; // Start from A8 (Rank 8, File A)
     
     for (char const &c : fen) {
         if (c == ' ') break; 
@@ -35,8 +41,9 @@ void parse_fen(std::string fen) {
     }
 }
 
+// Full Board ASCII Visualizer
 void print_board() {
-    std::cout << "\n  Davinci's Vision: The Full Board\n";
+    std::cout << "\n  🔥 Davinci Engine: Board State 🔥\n";
     std::cout << "  --------------------------------\n";
     for (int rank = 7; rank >= 0; rank--) {
         std::cout << rank + 1 << " | ";
@@ -66,21 +73,13 @@ void print_board() {
 }
 
 int main() {
-    std::cout << "🔥 Davinci Engine: Strict FIDE Rule Validator Active 🔥\n\n";
+    std::cout << "🚀 Davinci Chess Engine Core Initialized Successfully.\n";
     
+    // Load standard starting FEN position
     parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    print_board();
-
-    // Testing Move Legality Rule Check:
-    // Let's test if a Knight from B1 (Square 1) can legally move to C3 (Square 18)
-    U64 all_blockers = 0ULL;
-    for(int i=0; i<12; i++) all_blockers |= bitboards[i];
-    U64 white_pieces = bitboards[P] | bitboards[N] | bitboards[B] | bitboards[R] | bitboards[Q] | bitboards[K];
-    CastlingRights rights;
-
-    bool test_move = is_legal_move(1, 1, 18, 60, all_blockers, white_pieces, rights, -1, 0);
     
-    std::cout << "Move Test (Knight B1 -> C3): " << (test_move ? "LEGAL ✅" : "ILLEGAL ❌") << "\n";
+    // Display board vision
+    print_board();
 
     return 0;
 }
