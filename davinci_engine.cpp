@@ -1,28 +1,21 @@
 #include <iostream>
 #include <string>
-#include <cstdint>
+// Rules folder-la irunthu thani thaniyaa include panrom!
+#include "rules/common.hpp"
+#include "rules/knight.hpp"
+#include "rules/king.hpp"
+#include "rules/pawn.hpp"
 
-typedef uint64_t U64;
-
-// 12 Coins-kum Index (Caps = White, Small = Black)
+// 12 Coins-kum Index
 enum Piece { P, N, B, R, Q, K, p, n, b, r, q, k };
 U64 bitboards[12] = {0};
 
-// Square-la coin-a ulla vaikkum function
-void set_bit(U64 &board, int square) {
-    board |= (1ULL << square);
-}
-
-// Neenga sonna Caps/Lowercase logic-a purinjikkum AI Parser!
 void parse_fen(std::string fen) {
-    int square = 56; // Top left corner (A8) irunthu start panrom
-    
+    int square = 56; 
     for (char const &c : fen) {
-        if (c == ' ') break; // Board layout mudinchuruchu
-        if (c == '/') { square -= 16; continue; } // Adutha variykku (rank) pogum
-        if (isdigit(c)) { square += (c - '0'); continue; } // Empty kattangal
-
-        // Character-a vachi sariyaana bitboard-la set panrom
+        if (c == ' ') break; 
+        if (c == '/') { square -= 16; continue; } 
+        if (isdigit(c)) { square += (c - '0'); continue; } 
         switch (c) {
             case 'P': set_bit(bitboards[P], square); break;
             case 'N': set_bit(bitboards[N], square); break;
@@ -41,7 +34,6 @@ void parse_fen(std::string fen) {
     }
 }
 
-// Motha board-aiyum onna serthu print panna
 void print_board() {
     std::cout << "\n  Davinci's Vision: The Full Board\n";
     std::cout << "  --------------------------------\n";
@@ -49,9 +41,7 @@ void print_board() {
         std::cout << rank + 1 << " | ";
         for (int file = 0; file < 8; file++) {
             int square = rank * 8 + file;
-            char piece_char = '.'; // Empty aaga iruntha pulli (.)
-            
-            // Entha bitboard-la coin irukku nu thedi character-a maathuvathu
+            char piece_char = '.'; 
             if (bitboards[P] & (1ULL << square)) piece_char = 'P';
             else if (bitboards[N] & (1ULL << square)) piece_char = 'N';
             else if (bitboards[B] & (1ULL << square)) piece_char = 'B';
@@ -64,7 +54,6 @@ void print_board() {
             else if (bitboards[r] & (1ULL << square)) piece_char = 'r';
             else if (bitboards[q] & (1ULL << square)) piece_char = 'q';
             else if (bitboards[k] & (1ULL << square)) piece_char = 'k';
-
             std::cout << piece_char << " ";
         }
         std::cout << "\n";
@@ -74,11 +63,13 @@ void print_board() {
 }
 
 int main() {
-    // Chess-oda standard starting position FEN string
-    std::string start_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    
-    parse_fen(start_fen);
+    std::cout << "🔥 Davinci Engine (Modular Folder Arch) Initialized 🔥\n";
+    parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     print_board();
+    
+    // Test modular rules
+    U64 test_knight = mask_knight_attacks(27);
+    std::cout << "Folder Logic Test (Knight D4): " << test_knight << "\n";
 
     return 0;
 }
