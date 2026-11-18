@@ -3,3 +3,8 @@ __pycache__/
 *.pyc
 .virtual_documents/
 state.db
+
+
+# Added by cargo
+
+/target
